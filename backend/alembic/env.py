@@ -1,12 +1,18 @@
 import os
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
 from app.db.base import Base
 from app.models import *  # noqa: F401,F403  (registra los modelos en Base.metadata)
 
+# Carga el .env de la raiz del repo antes de leer cualquier variable.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+config = context.config
 config = context.config
 
 if config.config_file_name is not None:
