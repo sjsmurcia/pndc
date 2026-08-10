@@ -5,8 +5,7 @@ from app.api.v1.router import api_router
 
 DESCRIPCION = """
 Portal Nacional de Denuncias de Corrupcion.
-
-Ejercicio academico. No opera con denuncias reales.
+.
 
 Los endpoints de lectura son publicos y no requieren autenticacion.
 Solo escribir o descargar evidencia exige un rol de revisor.
