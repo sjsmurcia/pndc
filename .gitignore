@@ -1,0 +1,22 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+
+# Entorno y secretos
+.env
+*.local
+
+# Evidencia y cuarentena: nunca se versionan
+/var/quarantine/
+backend/uploads/
+
+# Editores
+.vscode/
+.idea/
