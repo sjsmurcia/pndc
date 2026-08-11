@@ -1,9 +1,25 @@
-"""registro central de modelos.
-alembic importa este paquete con 'from app.models import *'
-todos los modelos nuevos deben aparecer aqui o base.metada no lo conocera y las migraciones autogeneradas saldran vacias
+"""Registro central de modelos.
+
+Alembic importa este paquete con `from app.models import *`. Todo modelo
+nuevo debe aparecer aqui, o Base.metadata no lo conocera y las migraciones
+autogeneradas saldran vacias.
 """
 
 from app.models.catalogo import Categoria, Institucion
-from app.models.enums import TipoInstitucion
+from app.models.denuncia import Denuncia
+from app.models.enums import (
+    EstadoDenuncia,
+    Gravedad,
+    NivelIdentidad,
+    TipoInstitucion,
+)
 
-__all__ = ["Categoria", "Institucion", "TipoInstitucion"]
+__all__ = [
+    "Categoria",
+    "Denuncia",
+    "EstadoDenuncia",
+    "Gravedad",
+    "Institucion",
+    "NivelIdentidad",
+    "TipoInstitucion",
+]

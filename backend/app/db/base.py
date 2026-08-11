@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import MetaData, func
+from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 convencion = {
@@ -20,5 +20,5 @@ class MarcaTiempo:
     """Mixin. Solo fecha de creacion: casi nada en este esquema se actualiza."""
 
     creado_en: Mapped[datetime] = mapped_column(
-        server_default=func.now(), nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
