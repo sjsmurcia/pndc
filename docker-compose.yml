@@ -1,0 +1,80 @@
+name: pndc
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: pndc-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/sql/docker:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [backnet]
+
+  api:
+    build:
+      context: ./backend
+    container_name: pndc-api
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      DATABASE_URL: postgresql+psycopg://pndc_app:pndc_app_dev@db:5432/pndc
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/srv/app
+      - quarantine:/var/quarantine
+    networks: [backnet]
+
+  # Aislado a proposito: sin red, sin credenciales, sin acceso a la base.
+  # Recibe trabajo unicamente por el volumen compartido de cuarentena.
+  sanitizer:
+    build:
+      context: ./sanitizer
+    container_name: pndc-sanitizer
+    network_mode: "none"
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=256m
+    volumes:
+      - quarantine:/var/quarantine
+    profiles: ["completo"]
+
+  frontend:
+    image: node:22-alpine
+    container_name: pndc-frontend
+    working_dir: /srv/web
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/srv/web
+      - webmodules:/srv/web/node_modules
+    profiles: ["completo"]
+    networks: [backnet]
+
+volumes:
+  pgdata:
+  quarantine:
+  webmodules:
+
+networks:
+  backnet:
