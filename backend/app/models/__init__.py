@@ -9,6 +9,7 @@ from app.models.catalogo import Categoria, Institucion
 from app.models.denuncia import Denuncia
 from app.models.evidencia import Evidencia, Mensaje
 from app.models.revision import AsignacionRevision, Revision, Revisor
+from app.models.desenlace import Derivacion, Publicacion
 from app.models.enums import (
     AutorMensaje,
     DecisionRevision,
@@ -25,6 +26,7 @@ __all__ = [
     "Categoria",
     "DecisionRevision",
     "Denuncia",
+    "Derivacion",
     "EstadoDenuncia",
     "Evidencia",
     "Gravedad",
@@ -33,6 +35,7 @@ __all__ = [
     "NivelIdentidad",
     "Revision",
     "Revisor",
+    "Publicacion",
     "RolRevisor",
     "TipoInstitucion",
 ]
