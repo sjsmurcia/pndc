@@ -25,15 +25,19 @@ class NivelIdentidad(str, enum.Enum):
     SEUDONIMO = "seudonimo"
     PUBLICO = "publico"
 
-class Gravedad(str,enum.Enum):
+
+class Gravedad(str, enum.Enum):
     """la asigna el revisor en el triaje"""
+
     BAJA = "baja"
     MEDIA = "media"
     ALTA = "alta"
     CRITICA = "critica"
 
+
 class EstadoDenuncia(str, enum.Enum):
     """ciclo de vida"""
+
     RECIBIDA = "recibida"
     EN_SANEAMIENTO = "en_saneamiento"
     EN_TRIAJE = "en_triaje"
@@ -46,9 +50,26 @@ class EstadoDenuncia(str, enum.Enum):
     RECHAZADA = "rechazada"
 
 
-class AutorMensaje(str,enum.Enum):
+class AutorMensaje(str, enum.Enum):
     """quien escribe el mensaje no hay identidad solo el lado dialogo"""
 
     DENUNCIANTE = "denunciante"
     REVISOR = "revisor"
-   
+
+
+class RolRevisor(str, enum.Enum):
+    """Los designa la organizacion que opera el portal, no se eligen entre
+    los usuarios. El supervisor resuelve desacuerdos y aprueba casos
+    graves."""
+
+    REVISOR = "revisor"
+    SUPERVISOR = "supervisor"
+
+
+class DecisionRevision(str, enum.Enum):
+    """Resultado del triaje de un revisor sobre una denuncia."""
+
+    PROCEDE = "procede"
+    RECHAZA = "rechaza"
+    SOLICITA_AMPLIACION = "solicita_ampliacion"
+    DERIVA = "deriva"

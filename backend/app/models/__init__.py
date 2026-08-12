@@ -8,21 +8,31 @@ autogeneradas saldran vacias.
 from app.models.catalogo import Categoria, Institucion
 from app.models.denuncia import Denuncia
 from app.models.evidencia import Evidencia, Mensaje
+from app.models.revision import AsignacionRevision, Revision, Revisor
 from app.models.enums import (
     AutorMensaje,
+    DecisionRevision,
     EstadoDenuncia,
     Gravedad,
     NivelIdentidad,
+    RolRevisor,
     TipoInstitucion,
 )
 
 __all__ = [
+    "AsignacionRevision",
     "AutorMensaje",
     "Categoria",
+    "DecisionRevision",
     "Denuncia",
     "EstadoDenuncia",
+    "Evidencia",
     "Gravedad",
     "Institucion",
+    "Mensaje",
     "NivelIdentidad",
+    "Revision",
+    "Revisor",
+    "RolRevisor",
     "TipoInstitucion",
 ]
