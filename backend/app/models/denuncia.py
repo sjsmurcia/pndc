@@ -2,13 +2,8 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, MarcaTiempo
+from app.db.base import Base, MarcaTiempo, enum_pg
 from app.models.enums import EstadoDenuncia, Gravedad, NivelIdentidad
-def enum_pg(tipo, nombre: str) -> SAEnum:
-    """enum nativo de postgres, guarda el valor en minusculas
-    y no el nombre del miembro"""
-    return SAEnum(tipo, name=nombre, values_callable=lambda e: [m.value for m in e])
-
 
 class Denuncia(Base, MarcaTiempo):
     """Una denuncia.

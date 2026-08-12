@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -21,4 +22,14 @@ class MarcaTiempo:
 
     creado_en: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+def enum_pg(tipo, nombre: str)-> SAEnum:
+    """nativo de postgres, guarda el valor en minusculas y no el nombre"""
+    return SAEnum(
+        tipo, 
+        name=nombre,
+        values_callable=lambda e:[m.value for m in e]
+
+
     )

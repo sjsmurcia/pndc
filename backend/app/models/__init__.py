@@ -7,7 +7,9 @@ autogeneradas saldran vacias.
 
 from app.models.catalogo import Categoria, Institucion
 from app.models.denuncia import Denuncia
+from app.models.evidencia import Evidencia, Mensaje
 from app.models.enums import (
+    AutorMensaje,
     EstadoDenuncia,
     Gravedad,
     NivelIdentidad,
@@ -15,6 +17,7 @@ from app.models.enums import (
 )
 
 __all__ = [
+    "AutorMensaje",
     "Categoria",
     "Denuncia",
     "EstadoDenuncia",

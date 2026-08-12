@@ -44,4 +44,11 @@ class EstadoDenuncia(str, enum.Enum):
     DERIVADA = "derivada"
     PUBLICADA = "publicada"
     RECHAZADA = "rechazada"
-    
+
+
+class AutorMensaje(str,enum.Enum):
+    """quien escribe el mensaje no hay identidad solo el lado dialogo"""
+
+    DENUNCIANTE = "denunciante"
+    REVISOR = "revisor"
+   
