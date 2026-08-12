@@ -6,12 +6,8 @@ from app.models.enums import AutorMensaje
 
 
 class Evidencia(Base, MarcaTiempo):
-    """Archivo adjunto ya saneado.
-
-    Solo se guarda la version publicable: el original se destruye tras
-    sanear, porque conservarlo seria mantener un archivo con GPS a la
-    espera de filtrarse.
-    """
+    #Archivo adjunto ya saneado.
+    
 
     __tablename__ = "evidencias"
 

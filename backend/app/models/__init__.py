@@ -10,6 +10,7 @@ from app.models.denuncia import Denuncia
 from app.models.evidencia import Evidencia, Mensaje
 from app.models.revision import AsignacionRevision, Revision, Revisor
 from app.models.desenlace import Derivacion, Publicacion
+from app.models.integridad import Bitacora, DescargaEvidencia
 from app.models.enums import (
     AutorMensaje,
     DecisionRevision,
@@ -23,7 +24,9 @@ from app.models.enums import (
 __all__ = [
     "AsignacionRevision",
     "AutorMensaje",
+    "Bitacora",
     "Categoria",
+    "DescargaEvidencia",
     "DecisionRevision",
     "Denuncia",
     "Derivacion",
