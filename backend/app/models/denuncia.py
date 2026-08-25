@@ -1,10 +1,10 @@
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, Index, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, MarcaTiempo, enum_pg
 from app.models.enums import EstadoDenuncia, Gravedad, NivelIdentidad
-
+from app.models.catalogo import Categoria, Institucion
 class Denuncia(Base, MarcaTiempo):
     """Una denuncia.
 
@@ -40,6 +40,10 @@ class Denuncia(Base, MarcaTiempo):
         default=EstadoDenuncia.RECIBIDA,
     )
     relato: Mapped[str] = mapped_column(Text, nullable=False)
+    #relaciones solo de lectura 
+    categoria:Mapped["Categoria"]=relationship(lazy="joined")
+    institucion:Mapped["Institucion"]=relationship(lazy="joined")
+
     __table_args__ = (
         Index("ix_denuncias_estado", "estado"),
         Index("ix_denuncias_categoria_institucion",
@@ -48,3 +52,6 @@ class Denuncia(Base, MarcaTiempo):
 
     def __repr__(self)->str:
         return f"<Denuncia {self.id} {self.estado.value}>"
+
+
+    
