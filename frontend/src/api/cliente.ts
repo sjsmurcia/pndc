@@ -1,7 +1,6 @@
 import type { paths } from "./tipos";
 
-const BASE = import.meta.env.VIVE_API_URL ?? "http://localhost:8081";
-
+const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8001";
 /*extrae del openapi el tipo de una respuesta correcta */
 
 type Respuesta<T> = T extends { responses: infer R }
@@ -94,4 +93,11 @@ export function escribirMensaje(codigo: string, cuerpo: string) {
     method: "POST",
     body: JSON.stringify({ codigo, cuerpo }),
   });
+}
+
+//catalogo
+type ObtenerCatalogo = paths["/api/v1/catalogo"]["get"];
+
+export function obtenerCatalogo() {
+  return peticion<Respuesta<ObtenerCatalogo>>("/api/v1/catalogo");
 }

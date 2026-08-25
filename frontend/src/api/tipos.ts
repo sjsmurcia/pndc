@@ -21,6 +21,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/catalogo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Categorias e instituciones disponibles
+         * @description Datos publicos: quien va a denunciar aun no tiene codigo, asi que
+         *     este endpoint no puede exigir autenticacion de ningun tipo.
+         *
+         *     No emite evento a la bitacora: consultar el catalogo no es un hecho
+         *     del caso, y registrarlo permitiria inferir cuanta gente abre el
+         *     formulario sin llegar a enviarlo.
+         */
+        get: operations["obtener_catalogo_api_v1_catalogo_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/denuncias": {
         parameters: {
             query?: never;
@@ -108,6 +133,23 @@ export interface components {
              * Format: binary
              */
             archivo: string;
+        };
+        /**
+         * Catalogo
+         * @description Listas que alimentan los desplegables del asistente.
+         */
+        Catalogo: {
+            /** Categorias */
+            categorias: components["schemas"]["CategoriaVista"][];
+            /** Instituciones */
+            instituciones: components["schemas"]["InstitucionVista"][];
+        };
+        /** CategoriaVista */
+        CategoriaVista: {
+            /** Id */
+            id: number;
+            /** Nombre */
+            nombre: string;
         };
         /** DenunciaCreada */
         DenunciaCreada: {
@@ -202,6 +244,14 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** InstitucionVista */
+        InstitucionVista: {
+            /** Id */
+            id: number;
+            /** Nombre */
+            nombre: string;
+            tipo: components["schemas"]["TipoInstitucion"];
+        };
         /** MensajeCrear */
         MensajeCrear: {
             /** Codigo */
@@ -240,6 +290,15 @@ export interface components {
             /** Codigo */
             codigo: string;
         };
+        /**
+         * TipoInstitucion
+         * @description clasificacion de las instituciones, basado en la estructura de la
+         *     administracion public: centralizada, descentralizada, reguladora, empresas
+         *     publicas, gobiernos locales y poderes del estado. tambien con el sector privado, porque
+         *     la mayoria de casos hay un proveedor y un comprador
+         * @enum {string}
+         */
+        TipoInstitucion: "secretaria_estado" | "institucion_descentralizada" | "ente_regulador" | "empresa_publica" | "municipalidad" | "poder_judicial" | "organo_control" | "empresa_privada" | "otro";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -274,6 +333,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Salud"];
+                };
+            };
+        };
+    };
+    obtener_catalogo_api_v1_catalogo_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Catalogo"];
                 };
             };
         };

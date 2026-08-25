@@ -1,0 +1,77 @@
+/* Fuentes auto-hospedadas. NO se llama a Google Fonts: cada visitante
+   contactaria un servidor de terceros que recibiria su IP. Es la misma
+   razon por la que se descarto reCAPTCHA. */
+@import "@fontsource/source-sans-3/400.css";
+@import "@fontsource/source-sans-3/500.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@import "./variables.css";
+
+:root {
+  --ui: "Source Sans 3", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--superficie-alt);
+  font-family: var(--ui);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--enlace);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--enlace-visitado);
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/* Escala tipografica del manual. Dos pesos: 400 y 500, nada mas. */
+h1 {
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0 0 var(--sp-2);
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 var(--sp-3);
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 var(--sp-2);
+}
+
+p {
+  margin: 0 0 var(--sp-3);
+}

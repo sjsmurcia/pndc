@@ -1,0 +1,100 @@
+/* PNDC — generado desde tokens.json. NO editar a mano. */
+:root {
+  /* primitivos */
+  --c-navy-05: #e4effe;
+  --c-navy-10: #cadffe;
+  --c-navy-20: #9cc2fa;
+  --c-navy-30: #75a7f0;
+  --c-navy-40: #538de3;
+  --c-navy-50: #3976ce;
+  --c-navy-60: #2861b2;
+  --c-navy-70: #204e90;
+  --c-navy-80: #1b3b6a;
+  --c-navy-90: #132744;
+  --c-gray-05: #edeeef;
+  --c-gray-10: #dcdee0;
+  --c-gray-20: #bdc0c4;
+  --c-gray-30: #a2a5aa;
+  --c-gray-40: #898d93;
+  --c-gray-50: #73777d;
+  --c-gray-60: #5f6268;
+  --c-gray-70: #4c4f53;
+  --c-gray-80: #3a3c3f;
+  --c-gray-90: #252729;
+  --c-red-05: #ffe9e6;
+  --c-red-10: #fed4cf;
+  --c-red-20: #ffaaa0;
+  --c-red-30: #f4867a;
+  --c-red-40: #e4645a;
+  --c-red-50: #ce4941;
+  --c-red-60: #b23630;
+  --c-red-70: #8f2b26;
+  --c-red-80: #6a241f;
+  --c-red-90: #441915;
+  --c-green-05: #e0f2e5;
+  --c-green-10: #c5e5cf;
+  --c-green-20: #95cca7;
+  --c-green-30: #69b585;
+  --c-green-40: #3e9e67;
+  --c-green-50: #16884f;
+  --c-green-60: #067140;
+  --c-green-70: #015b32;
+  --c-green-80: #0b4527;
+  --c-green-90: #0c2c1a;
+  --c-amber-05: #f9edd5;
+  --c-amber-10: #f0dcb1;
+  --c-amber-20: #dfbb71;
+  --c-amber-30: #cd9e2a;
+  --c-amber-40: #b28603;
+  --c-amber-50: #977103;
+  --c-amber-60: #7d5d02;
+  --c-amber-70: #654b04;
+  --c-amber-80: #4d3801;
+  --c-amber-90: #332400;
+  --c-amber-15v: #f2cb07;
+
+  /* semanticos */
+  --texto: var(--c-gray-90);
+  --texto-secundario: var(--c-gray-70);
+  --texto-inverso: var(--c-gray-05);
+  --superficie: #ffffff;
+  --superficie-alt: var(--c-gray-05);
+  --borde: var(--c-gray-20);
+  --borde-input: var(--c-gray-90);
+  --accion: var(--c-navy-60);
+  --accion-hover: var(--c-navy-70);
+  --enlace: var(--c-navy-70);
+  --enlace-visitado: var(--c-navy-90);
+  --foco: var(--c-amber-15v);
+  --foco-borde: var(--c-gray-90);
+  --error: var(--c-red-60);
+  --error-fondo: var(--c-red-05);
+  --gravedad-critica: var(--c-red-70);
+  --gravedad-alta: var(--c-amber-70);
+  --gravedad-media: var(--c-gray-60);
+  --gravedad-baja: var(--c-gray-40);
+  --cadena-verificada: var(--c-green-70);
+  --cadena-fondo: var(--c-green-05);
+  --aviso-fondo: var(--c-amber-05);
+  --aviso-borde: var(--c-amber-70);
+  --ranking-01: var(--c-navy-20);
+  --ranking-02: var(--c-navy-40);
+  --ranking-03: var(--c-navy-60);
+  --ranking-04: var(--c-navy-80);
+
+  /* espaciado base 4px */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+  /* radios: casi nulos, sobriedad institucional */
+  --r-0: 0; --r-1: 2px; --r-2: 4px;
+
+  /* sin sombras decorativas: la elevacion se expresa con borde */
+  --elev-borde: 1px solid var(--borde);
+}
+
+*:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 0;
+  box-shadow: 0 3px 0 0 var(--foco-borde);
+}
