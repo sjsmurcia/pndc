@@ -44,7 +44,13 @@ def guardar_evidencia(evidencia_id: int, limpia) -> str:
     nombre = f"{evidencia_id:08d}{extension}"
     (DIR_EVIDENCIAS / nombre).write_bytes(limpia.contenido)
     return f"evidencias/{nombre}"
+def borrar_evidencia(ruta_relativa: str) -> None:
+    """Elimina un archivo saneado que quedo sin su fila en la base.
 
+    missing_ok=True: si el archivo ya no esta, no hay nada que hacer.
+    """
+    nombre = Path(ruta_relativa).name
+    (DIR_EVIDENCIAS / nombre).unlink(missing_ok=True)
 
 @router.post(
     "",
@@ -148,33 +154,41 @@ def subir_evidencia(
     db.add(evidencia)
     db.flush()
 
+        # El sistema de archivos NO participa de la transaccion: si algo falla
+    # despues de escribir, el rollback deshace la fila pero el archivo se
+    # queda huerfano. Por eso se limpia a mano.
     ruta = guardar_evidencia(evidencia.id, limpia)
-    evidencia.url = ruta
 
-    cadena.registrar(
-        db,
-        TipoEvento.EVIDENCIA_RECIBIDA,
-        {
-            "denuncia_id": denuncia.id,
-            "evidencia_id": evidencia.id,
-            "mime": limpia.mime,
-        },
-    )
-    cadena.registrar(
-        db,
-        TipoEvento.EVIDENCIA_SANEADA,
-        {
-            "evidencia_id": evidencia.id,
-            "sha256": limpia.sha256,
-            "mime_final": limpia.mime,
-        },
-    )
+    try:
+        evidencia.url = ruta
 
-    return EvidenciaSubida(
-        evidencia_id=evidencia.id,
-        mime=limpia.mime,
-        sha256=limpia.sha256,
-        ancho=limpia.ancho,
-        alto=limpia.alto,
-        sanitizada=True,
-    )
+        cadena.registrar(
+            db,
+            TipoEvento.EVIDENCIA_RECIBIDA,
+            {
+                "denuncia_id": denuncia.id,
+                "evidencia_id": evidencia.id,
+                "mime": limpia.mime,
+            },
+        )
+        cadena.registrar(
+            db,
+            TipoEvento.EVIDENCIA_SANEADA,
+            {
+                "evidencia_id": evidencia.id,
+                "sha256": limpia.sha256,
+                "mime_final": limpia.mime,
+            },
+        )
+
+        return EvidenciaSubida(
+            evidencia_id=evidencia.id,
+            mime=limpia.mime,
+            sha256=limpia.sha256,
+            ancho=limpia.ancho,
+            alto=limpia.alto,
+            sanitizada=True,
+        )
+    except Exception:
+        borrar_evidencia(ruta)
+        raise
