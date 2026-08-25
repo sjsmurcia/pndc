@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     pndc_env: str = "dev"
     database_url: str = "postgresql+psycopg://pndc_app:pndc_app_dev@localhost:5432/pndc"
-
+    pndc_quarantine_dir: str = "/var/quarantine"
     # Nunca se registran IPs. La bandera existe para que la ausencia sea
     # explicita y verificable en la configuracion, no solo en el codigo.
     registrar_ip: bool = False

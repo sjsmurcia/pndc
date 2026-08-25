@@ -63,3 +63,17 @@ class MensajeCrear(BaseModel):
     codigo: str=Field(min_length=8, max_length=40)
     cuerpo: str=Field(min_length=5, max_length=5000)
 
+class EvidenciaSubida(BaseModel):
+    #resultado del saneamiento de una imagen
+    evidencia_id:int
+    mime:str
+    sha256:str
+    ancho:int
+    alto:int
+    sanitizada:bool
+    aviso:str=(
+        "El saneamiento elimina lo que el archivo guarda sobre usted, no lo "
+        "que el archivo muestra. Si en la imagen aparece su escritorio, su "
+        "firma o algo que lo identifique, revisela antes de continuar."
+        
+    )
