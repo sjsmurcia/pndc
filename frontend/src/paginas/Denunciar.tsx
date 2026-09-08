@@ -7,7 +7,7 @@ import { Progreso } from "../componentes/Progreso";
 import { crearDenuncia } from "../api/cliente";
 import { subirEvidencia } from "../api/cliente";
 import { ErrorApi } from "../api/cliente";
-
+import { SelectorIdentidad } from "./SelectorIdentidad";
 export type BorradorDenuncia = {
   relato: string;
   categoriaId: number | null;
@@ -60,16 +60,27 @@ export function Denunciar() {
   function actualizar(cambios: Partial<BorradorDenuncia>) {
     setBorrador((previo) => ({ ...previo, ...cambios }));
   }
-
-  if(resultado){
+  if (paso === 0) {
+    return (
+      <SelectorIdentidad
+        actual={borrador.nivelIdentidad}
+        onElegir={(nivelIdentidad) => {
+          actualizar({ nivelIdentidad });
+          setPaso(1);
+        }}
+        onCancelar={() => setPaso(1)}
+      />
+    );
+  }
+  if (resultado) {
     return (
       <PantallaCodigo
-      resultado={resultado}
-      onSalir={()=>{
-        setResultado(null);
-        setBorrador(VACIO);
-        setPaso(1);
-      }}
+        resultado={resultado}
+        onSalir={() => {
+          setResultado(null);
+          setBorrador(VACIO);
+          setPaso(1);
+        }}
       />
     );
   }
@@ -80,6 +91,7 @@ export function Denunciar() {
         nivel={borrador.nivelIdentidad}
         onCambiar={() => setPaso(0)}
       />
+
 
       <main style={{ padding: "var(--sp-6) var(--sp-5) var(--sp-8)" }}>
         <h1>Enviar denuncia</h1>
