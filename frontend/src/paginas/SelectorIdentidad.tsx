@@ -132,7 +132,7 @@ export function SelectorIdentidad({
                                     <span
                                         style={{
                                             fontSize: 14,
-                                            fontweight: 400,
+                                            fontWeight: 400,
                                             color: "var(--texto-secundario)",
                                             marginLeft: "var(--sp-2)",
 

@@ -8,6 +8,7 @@ import { crearDenuncia } from "../api/cliente";
 import { subirEvidencia } from "../api/cliente";
 import { ErrorApi } from "../api/cliente";
 import { SelectorIdentidad } from "./SelectorIdentidad";
+import { EditorDifuminado } from "../componentes/EditorDifuminado";
 export type BorradorDenuncia = {
   relato: string;
   categoriaId: number | null;
@@ -301,9 +302,10 @@ function PasoEvidencia({
   onAtras: () => void;
   onSiguiente: () => void;
 }) {
-  const [reconoce, setReconoce] = useState(false);
-  const [rechazados, setRechazados] = useState<string[]>([]);
 
+  const [reconoce, setReconoce] = useState(false);
+  const [editando, setEditando] = useState<number | null>(null);
+  const [rechazados, setRechazados] = useState<string[]>([]);
   function agregar(lista: FileList | null) {
     if (!lista) return;
 
@@ -325,8 +327,23 @@ function PasoEvidencia({
   function quitar(indice: number) {
     onCambiar({ archivos: archivos.filter((_, i) => i !== indice) });
   }
-
+  function reemplazar(indice: number, editado: File) {
+    onCambiar({
+      archivos: archivos.map((a, i) => (i === indice ? editado : a)),
+    });
+    setEditando(null);
+  }
+  if (editando !== null) {
+    return (
+      <EditorDifuminado
+        archivo={archivos[editando]}
+        onGuardar={(editado) => reemplazar(editando, editado)}
+        onCancelar={() => setEditando(null)}
+      />
+    );
+  }
   return (
+
     <section>
       <h2>Evidencia</h2>
       <p style={{ color: "var(--texto-secundario)" }}>
@@ -429,7 +446,14 @@ function PasoEvidencia({
                   {(archivo.size / 1024).toFixed(0)} KB
                 </td>
                 <td style={{ padding: "var(--sp-2) 0", textAlign: "right" }}>
-                  <Boton variante="texto" onClick={() => quitar(indice)}>
+                  <Boton variante="texto" onClick={() => setEditando(indice)}>
+                    Cubrir Zonas
+                  </Boton>
+                  <Boton 
+                  variante="texto"
+                  onClick={()=>quitar(indice)}
+                  style={{marginLeft:"var(--sp-3)"}}
+                  >
                     Quitar
                   </Boton>
                 </td>
