@@ -21,6 +21,13 @@ from app.models.enums import (
     TipoInstitucion,
 )
 
+from app.models.revision import(
+    AsignacionRevision,
+    Revision,
+    Revisor,
+    SesionRevisor,
+)
+
 __all__ = [
     "AsignacionRevision",
     "AutorMensaje",
@@ -40,5 +47,6 @@ __all__ = [
     "Revisor",
     "Publicacion",
     "RolRevisor",
+    "SesionRevisor",
     "TipoInstitucion",
 ]
