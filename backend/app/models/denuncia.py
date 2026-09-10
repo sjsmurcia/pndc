@@ -43,7 +43,7 @@ class Denuncia(Base, MarcaTiempo):
     #relaciones solo de lectura 
     categoria:Mapped["Categoria"]=relationship(lazy="joined")
     institucion:Mapped["Institucion"]=relationship(lazy="joined")
-
+    seudonimo: Mapped[str | None] = mapped_column(String(60), nullable=True)
     __table_args__ = (
         Index("ix_denuncias_estado", "estado"),
         Index("ix_denuncias_categoria_institucion",

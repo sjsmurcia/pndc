@@ -25,7 +25,8 @@ from app.schemas.denuncia import DenunciaCreada, DenunciaCrear, EvidenciaSubida
 from app.services import cadena
 from app.services.codigo import generar_codigo, hashear_codigo
 from app.services.eventos import TipoEvento
-
+from app.models.enums import EstadoDenuncia, NivelIdentidad
+from app.services.codigo import generar_codigo, generar_seudonimo, hashear_codigo
 router = APIRouter(prefix="/denuncias", tags=["denuncias"])
 
 
@@ -68,7 +69,12 @@ def crear_denuncia(
     if not db.get(Institucion, datos.institucion_id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Institucion inexistente")
     codigo = generar_codigo()
-
+    #solo para el nivel de seudonimo
+    seudonimo = ( 
+        generar_seudonimo()
+        if datos.nivel_identidad==NivelIdentidad.SEUDONIMO 
+        else None
+    )
     denuncia = Denuncia(
         codigo_hash=hashear_codigo(codigo),
         categoria_id=datos.categoria_id,
@@ -76,6 +82,7 @@ def crear_denuncia(
         nivel_identidad=datos.nivel_identidad,
         estado=EstadoDenuncia.RECIBIDA,
         relato=datos.relato,
+        seudonimo=seudonimo,
     )
     db.add(denuncia)
     db.flush()  # asignar el id sin cerrar la transaccion

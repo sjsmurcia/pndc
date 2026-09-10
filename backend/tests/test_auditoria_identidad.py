@@ -75,6 +75,7 @@ def test_denuncias_solo_tiene_las_columnas_previstas():
         "gravedad",
         "estado",
         "relato",
+        "seudonimo",
         "creado_en",
     }
     reales = {c.name for c in Denuncia.__table__.columns}
@@ -129,3 +130,11 @@ def test_el_codigo_fuente_no_registra_la_peticion():
         if patron.search(texto):
             sospechosas.append(archivo.name)
     assert not sospechosas, f"Posible registro de peticion: {sospechosas}"
+
+
+def test_el_seudonimo_lo_genera_el_servidor():
+    """El seudonimo no lo elige el usuario: un apodo propio suele ser el
+    mismo que usa en otros sitios, y seria una huella que cruza sistemas."""
+    from app.schemas.denuncia import DenunciaCrear
+
+    assert "seudonimo" not in DenunciaCrear.model_fields
