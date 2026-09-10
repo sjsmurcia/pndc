@@ -80,6 +80,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/denuncias/reto": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obtener un reto de prueba de trabajo
+         * @description El navegador debe resolver este reto antes de poder enviar.
+         *
+         *     publico y sin autenticacion: quien va a denunciar aun no tiene codigo,
+         *     el reto va firmado, asi que el servidor no necesita guardarlo.
+         */
+        get: operations["obtener_reto_api_v1_denuncias_reto_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/seguimiento": {
         parameters: {
             query?: never;
@@ -181,6 +204,8 @@ export interface components {
             relato: string;
             /** Nonce */
             nonce?: string | null;
+            /** Reto */
+            reto?: string | null;
             /** Sitio Web */
             sitio_web?: string | null;
         };
@@ -421,6 +446,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    obtener_reto_api_v1_denuncias_reto_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

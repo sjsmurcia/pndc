@@ -9,6 +9,8 @@ import { subirEvidencia } from "../api/cliente";
 import { ErrorApi } from "../api/cliente";
 import { SelectorIdentidad } from "./SelectorIdentidad";
 import { EditorDifuminado } from "../componentes/EditorDifuminado";
+import { obtenerReto } from "../api/cliente";
+import { resolverReto } from "../api/pruebaTrabajo";
 export type BorradorDenuncia = {
   relato: string;
   categoriaId: number | null;
@@ -175,6 +177,23 @@ function PasoRelato({
         aria-describedby="ayuda-relato"
         style={{ ...campo, resize: "vertical", lineHeight: 1.65 }}
       />
+      {/* Campo trampa: invisible para personas, los bots lo rellenan.
+          Se oculta fuera de pantalla en vez de con display:none, porque
+          algunos bots ignoran los campos ocultos de esa forma. */}
+      <input
+        type="text"
+        name="sitio_web"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: 1,
+          height: 1,
+          opacity: 0,
+        }}
+      />
       <p id="ayuda-relato" style={ayuda}>
         {faltan > 0
           ? `Faltan ${faltan} caracteres para poder continuar.`
@@ -188,6 +207,7 @@ function PasoRelato({
       </div>
     </section>
   );
+
 }
 
 function PasoClasificacion({
@@ -492,14 +512,39 @@ function PasoEnvio({
 }) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [prueba, setPrueba] = useState<{ reto: string; nonce: string } | null>(
+    null,
+  );
+  const [resolviendo, setResolviendo] = useState(true);
+  
   const categoria = catalogo?.categorias.find(
     (c) => c.id === borrador.categoriaId,
   );
+
   const institucion = catalogo?.instituciones.find(
     (i) => i.id === borrador.institucionId,
   );
+   // La prueba de trabajo se resuelve mientras la persona revisa su
+  // denuncia. Cuando pulse enviar, ya estara lista.
+  useEffect(() => {
+    let cancelado = false;
 
+    obtenerReto()
+      .then(async (datos) => {
+        const nonce = await resolverReto(datos.reto, datos.ceros);
+        if (!cancelado) {
+          setPrueba({ reto: datos.reto, nonce });
+          setResolviendo(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelado) setResolviendo(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
   async function enviar() {
     setEnviando(true);
     setError(null);
@@ -510,6 +555,8 @@ function PasoEnvio({
         institucion_id: borrador.institucionId!,
         nivel_identidad: borrador.nivelIdentidad,
         relato: borrador.relato,
+        reto:prueba?.reto,
+        nonce:prueba?.nonce,
       });
 
       // Los adjuntos van despues, ya con el codigo emitido. Si alguno
@@ -597,11 +644,22 @@ function PasoEnvio({
       </Aviso>
 
       <div style={{ display: "flex", gap: "var(--sp-3)", marginTop: "var(--sp-5)" }}>
+        {resolviendo && (
+          <p style={{ fontSize: 14, color: "var(--texto-secundario)" }}>
+            El navegador está resolviendo una prueba de cómputo que evita
+            envíos automatizados. Tarda unos segundos y no requiere ninguna
+            acción de su parte.
+          </p>
+        )}
         <Boton variante="secundario" onClick={onAtras} disabled={enviando}>
           Volver a evidencia
         </Boton>
-        <Boton onClick={enviar} disabled={enviando}>
-          {enviando ? "Enviando…" : "Enviar denuncia"}
+        <Boton onClick={enviar} disabled={enviando || resolviendo || !prueba}>
+          {resolviendo
+            ? "Preparando envío…"
+            : enviando
+              ? "Enviando…"
+              : "Enviar denuncia"}
         </Boton>
       </div>
     </section>

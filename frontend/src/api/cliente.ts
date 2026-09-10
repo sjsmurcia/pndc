@@ -101,3 +101,9 @@ type ObtenerCatalogo = paths["/api/v1/catalogo"]["get"];
 export function obtenerCatalogo() {
   return peticion<Respuesta<ObtenerCatalogo>>("/api/v1/catalogo");
 }
+
+type ObtenerReto = paths["/api/v1/denuncias/reto"]["get"];
+
+export function obtenerReto() {
+  return peticion<Respuesta<ObtenerReto>>("/api/v1/denuncias/reto");
+}

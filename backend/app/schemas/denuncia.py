@@ -13,7 +13,9 @@ class DenunciaCrear(BaseModel):
 
     # prueba de trabajo.
     nonce: str | None = None
-
+    #navegador
+    reto: str | None=None
+    
     # campo trampa
     sitio_web: str | None = None
 

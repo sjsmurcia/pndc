@@ -30,10 +30,20 @@ from app.services.codigo import generar_codigo, generar_seudonimo, hashear_codig
 from dataclasses import dataclass
 
 from app.services.saneador_pdf import SaneamientoPdfFallido, sanear_pdf
+from app.services.antispam import (
+    EnvioRechazado,
+    emitir_reto,
+    honeypot_relleno,
+    registrar_envio,
+    verificar_prueba,
+)
+
 router = APIRouter(prefix="/denuncias", tags=["denuncias"])
 
 
 DIR_EVIDENCIAS = Path(get_settings().pndc_quarantine_dir) / "evidencias"
+
+
 @dataclass(frozen=True)
 class ArchivoLimpio:
     """Resultado del saneamiento, sea imagen o PDF.
@@ -47,6 +57,7 @@ class ArchivoLimpio:
     sha256: str
     ancho: int
     alto: int
+
 
 def guardar_evidencia(evidencia_id: int, limpia) -> str:
     """Escribe la version saneada y devuelve su ruta relativa.
@@ -84,6 +95,18 @@ def borrar_evidencia(ruta_relativa: str) -> None:
 def crear_denuncia(
     datos: DenunciaCrear, db: Session = Depends(get_db)
 ) -> DenunciaCreada:
+    # capa 1: campo
+    if honeypot_relleno(datos.sitio_web):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Envio no valido")
+    # capa 2: prueba de trabajo
+    if not datos.reto or not datos.nonce:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Falta la prueba de trabajo. Recargue la pagina.")
+    # capa 3: limite del formulario
+    try:
+        verificar_prueba(datos.reto, datos.nonce)
+        registrar_envio()
+    except EnvioRechazado as exc:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, str(exc)) from exc
     # registra una denuncia y emite el codigo del seguimiento.
 
     if not db.get(Categoria, datos.categoria_id):
@@ -240,3 +263,15 @@ def subir_evidencia(
     except Exception:
         borrar_evidencia(ruta)
         raise
+
+
+@router.get(
+    "/reto",
+    summary="Obtener un reto de prueba de trabajo",
+)
+def obtener_reto() -> dict:
+    """El navegador debe resolver este reto antes de poder enviar.
+
+    publico y sin autenticacion: quien va a denunciar aun no tiene codigo,
+    el reto va firmado, asi que el servidor no necesita guardarlo."""
+    return emitir_reto()
