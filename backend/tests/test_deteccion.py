@@ -24,11 +24,6 @@ def test_ejecutable_disfrazado_de_imagen_se_rechaza():
         detectar(ejecutable)
 
 
-def test_pdf_todavia_no_se_acepta():
-    with pytest.raises(ArchivoRechazado):
-        detectar(b"%PDF-1.7\n" + b"\x00" * 100)
-
-
 def test_zip_se_rechaza():
     with pytest.raises(ArchivoRechazado):
         detectar(b"PK\x03\x04" + b"\x00" * 100)
@@ -59,3 +54,4 @@ def test_jpeg_acepta_ambas_extensiones():
     formato = detectar(JPEG)
     assert extension_coincide("foto.jpg", formato)
     assert extension_coincide("FOTO.JPEG", formato)
+

@@ -29,6 +29,7 @@ class Formato:
 FORMATOS: tuple[Formato, ...] = (
     Formato("image/jpeg", ".jpg", b"\xff\xd8\xff"),
     Formato("image/png", ".png", b"\x89PNG\r\n\x1a\n"),
+    Formato("application/pdf", ".pdf", b"%PDF-"),
 )
 
 
@@ -57,7 +58,7 @@ def detectar(contenido: bytes) -> Formato:
             return formato
 
     raise ArchivoRechazado(
-        "Formato no admitido. Solo se aceptan imagenes JPEG y PNG."
+        "Formato no admitido. Solo se aceptan imagenes JPEG, PNG,y documentos PDF."
     )
 
 

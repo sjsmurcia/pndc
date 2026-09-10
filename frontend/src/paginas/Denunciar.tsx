@@ -288,7 +288,7 @@ function PasoClasificacion({
   );
 }
 
-const FORMATOS_ACEPTADOS = "image/jpeg,image/png";
+const FORMATOS_ACEPTADOS = "image/jpeg,image/png,application/pdf";
 const LIMITE_MB = 15;
 
 function PasoEvidencia({
@@ -449,10 +449,10 @@ function PasoEvidencia({
                   <Boton variante="texto" onClick={() => setEditando(indice)}>
                     Cubrir Zonas
                   </Boton>
-                  <Boton 
-                  variante="texto"
-                  onClick={()=>quitar(indice)}
-                  style={{marginLeft:"var(--sp-3)"}}
+                  <Boton
+                    variante="texto"
+                    onClick={() => quitar(indice)}
+                    style={{ marginLeft: "var(--sp-3)" }}
                   >
                     Quitar
                   </Boton>

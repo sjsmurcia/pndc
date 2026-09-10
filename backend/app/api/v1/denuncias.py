@@ -27,11 +27,26 @@ from app.services.codigo import generar_codigo, hashear_codigo
 from app.services.eventos import TipoEvento
 from app.models.enums import EstadoDenuncia, NivelIdentidad
 from app.services.codigo import generar_codigo, generar_seudonimo, hashear_codigo
+from dataclasses import dataclass
+
+from app.services.saneador_pdf import SaneamientoPdfFallido, sanear_pdf
 router = APIRouter(prefix="/denuncias", tags=["denuncias"])
 
 
 DIR_EVIDENCIAS = Path(get_settings().pndc_quarantine_dir) / "evidencias"
+@dataclass(frozen=True)
+class ArchivoLimpio:
+    """Resultado del saneamiento, sea imagen o PDF.
 
+    ancho y alto quedan en cero para PDF: la nocion de dimensiones no
+    aplica a un documento de varias paginas.
+    """
+
+    contenido: bytes
+    mime: str
+    sha256: str
+    ancho: int
+    alto: int
 
 def guardar_evidencia(evidencia_id: int, limpia) -> str:
     """Escribe la version saneada y devuelve su ruta relativa.
@@ -41,10 +56,16 @@ def guardar_evidencia(evidencia_id: int, limpia) -> str:
     de otro tramite.
     """
     DIR_EVIDENCIAS.mkdir(parents=True, exist_ok=True)
-    extension = ".jpg" if limpia.mime == "image/jpeg" else ".png"
+    extension = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "application/pdf": ".pdf",
+    }[limpia.mime]
     nombre = f"{evidencia_id:08d}{extension}"
     (DIR_EVIDENCIAS / nombre).write_bytes(limpia.contenido)
     return f"evidencias/{nombre}"
+
+
 def borrar_evidencia(ruta_relativa: str) -> None:
     """Elimina un archivo saneado que quedo sin su fila en la base.
 
@@ -52,6 +73,7 @@ def borrar_evidencia(ruta_relativa: str) -> None:
     """
     nombre = Path(ruta_relativa).name
     (DIR_EVIDENCIAS / nombre).unlink(missing_ok=True)
+
 
 @router.post(
     "",
@@ -69,10 +91,10 @@ def crear_denuncia(
     if not db.get(Institucion, datos.institucion_id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Institucion inexistente")
     codigo = generar_codigo()
-    #solo para el nivel de seudonimo
-    seudonimo = ( 
+    # solo para el nivel de seudonimo
+    seudonimo = (
         generar_seudonimo()
-        if datos.nivel_identidad==NivelIdentidad.SEUDONIMO 
+        if datos.nivel_identidad == NivelIdentidad.SEUDONIMO
         else None
     )
     denuncia = Denuncia(
@@ -120,7 +142,7 @@ def subir_evidencia(
     archivo: Annotated[UploadFile, File()],
     db: Session = Depends(get_db),
 ) -> EvidenciaSubida:
-    
+
     denuncia = buscar_por_codigo(db, codigo)
     if denuncia is None or denuncia.id != denuncia_id:
         raise HTTPException(
@@ -143,11 +165,30 @@ def subir_evidencia(
         )
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, str(exc)) from exc
 
+        # Cada formato delata de una manera distinta, asi que cada uno tiene
+    # su propio saneador. Imagenes: reescritura de pixeles. PDF:
+    # rasterizacion, porque un rectangulo negro no borra el texto debajo.
     try:
-        limpia = sanear(contenido, formato)
-    except SaneamientoFallido as exc:
+        if formato.mime == "application/pdf":
+            pdf = sanear_pdf(contenido)
+            limpia = ArchivoLimpio(
+                contenido=pdf.contenido,
+                mime="application/pdf",
+                sha256=pdf.sha256,
+                ancho=0,
+                alto=0,
+            )
+        else:
+            imagen = sanear(contenido, formato)
+            limpia = ArchivoLimpio(
+                contenido=imagen.contenido,
+                mime=imagen.mime,
+                sha256=imagen.sha256,
+                ancho=imagen.ancho,
+                alto=imagen.alto,
+            )
+    except (SaneamientoFallido, SaneamientoPdfFallido) as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
-
     # A partir de aqui el original ya no se usa. No se guarda en ningun lado.
     del contenido
 
@@ -161,7 +202,7 @@ def subir_evidencia(
     db.add(evidencia)
     db.flush()
 
-        # El sistema de archivos NO participa de la transaccion: si algo falla
+    # El sistema de archivos NO participa de la transaccion: si algo falla
     # despues de escribir, el rollback deshace la fila pero el archivo se
     # queda huerfano. Por eso se limpia a mano.
     ruta = guardar_evidencia(evidencia.id, limpia)
