@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { Denunciar } from "./paginas/Denunciar";
+import { Verificar } from "./paginas/Verificar";
+
+type Vista = "denunciar" | "verificar";
 
 export default function App() {
+  const [vista, setVista] = useState<Vista>("denunciar");
   return (
     <div style={{ minHeight: "100vh", background: "var(--superficie-alt)" }}>
       <div
@@ -36,10 +41,63 @@ export default function App() {
               Portal Nacional de Denuncias de Corrupción
             </span>
           </div>
+          <nav style={{ marginLeft: "auto", display: "flex", gap: "var(--sp-4)" }}>
+            <button
+              type="button"
+              onClick={() => setVista("denunciar")}
+              style={enlaceNav(vista === "denunciar")}
+            >
+              Denunciar
+            </button>
+            <button
+              type="button"
+              onClick={() => setVista("verificar")}
+              style={enlaceNav(vista === "verificar")}
+            >
+              Verificar registro
+            </button>
+          </nav>
         </header>
 
-        <Denunciar />
+                {vista === "denunciar" ? <Denunciar /> : <Verificar />}
+
+        <footer
+          style={{
+            borderTop: "1px solid var(--borde)",
+            padding: "var(--sp-5)",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--texto-secundario)",
+              margin: 0,
+            }}
+          >
+          </p>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--texto-secundario)",
+              margin: "var(--sp-2) 0 0",
+            }}
+          >
+            Desarrollado por Jessel Murcia.
+          </p>
+        </footer>
       </div>
     </div>
   );
+}
+function enlaceNav(activo: boolean): React.CSSProperties {
+  return {
+    background: "none",
+    border: 0,
+    padding: "var(--sp-1) 0",
+    fontSize: 15,
+    fontWeight: activo ? 500 : 400,
+    color: activo ? "var(--c-navy-70)" : "var(--texto-secundario)",
+    borderBottom: activo ? "2px solid var(--c-navy-70)" : "2px solid transparent",
+    cursor: "pointer",
+  };
 }

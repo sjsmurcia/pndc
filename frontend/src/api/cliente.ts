@@ -107,3 +107,11 @@ type ObtenerReto = paths["/api/v1/denuncias/reto"]["get"];
 export function obtenerReto() {
   return peticion<Respuesta<ObtenerReto>>("/api/v1/denuncias/reto");
 }
+
+//publico
+
+type EstadoCadena = paths["/api/v1/publico/bitacora/estado"]["get"];
+export function obtenerEstadoCadena(){
+  return peticion<Respuesta<EstadoCadena>>("/api/v1/publico/bitacora/estado");
+  
+}

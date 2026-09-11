@@ -137,6 +137,225 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sesion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Identidad del revisor en sesion
+         * @description Permite al frontend saber si hay sesion y de quien.
+         */
+        get: operations["sesion_actual_api_v1_sesion_get"];
+        put?: never;
+        /**
+         * Iniciar sesion como revisor
+         * @description Abre una sesion y emite la cookie.
+         *
+         *     No emite evento a la bitacora: registrar cada inicio de sesion
+         *     permitiria reconstruir los horarios de trabajo de cada revisor, y eso
+         *     excede lo que la rendicion de cuentas exige. Lo que si se registra es
+         *     cada ACCION sobre un caso.
+         */
+        post: operations["iniciar_sesion_api_v1_sesion_post"];
+        /**
+         * Cerrar sesion
+         * @description Borra la sesion de la base y limpia la cookie.
+         */
+        delete: operations["terminar_sesion_api_v1_sesion_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/cola": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Casos pendientes de revision
+         * @description Lista los casos en proceso, sin el relato.
+         *
+         *     Devolver el contenido aqui permitiria a un revisor leer todos los
+         *     casos sin dejar rastro. El relato exige abrir el caso, y abrirlo
+         *     exige tomarlo.
+         */
+        get: operations["cola_de_triaje_api_v1_revision_cola_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/casos/{denuncia_id}/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tomar un caso para revisarlo
+         * @description Asigna el caso al revisor y lo registra en la bitacora.
+         *
+         *     Es el punto donde la rendicion de cuentas empieza: a partir de aqui
+         *     consta publicamente que este revisor accedio a este caso.
+         */
+        post: operations["tomar_caso_api_v1_revision_casos__denuncia_id__tomar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/casos/{denuncia_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de un caso asignado
+         * @description Contenido completo. Exige tener el caso asignado.
+         */
+        get: operations["detalle_caso_api_v1_revision_casos__denuncia_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/casos/{denuncia_id}/gravedad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Asignar gravedad a un caso
+         * @description Clasifica el caso y mueve su estado segun la regla de gravedad.
+         *
+         *     Critica congela la publicacion de inmediato: el caso no puede llegar
+         *     al portal publico, solo derivarse.
+         */
+        post: operations["asignar_gravedad_api_v1_revision_casos__denuncia_id__gravedad_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/casos/{denuncia_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emitir decision sobre un caso
+         * @description Registra la decision del revisor y avanza el caso si procede.
+         *
+         *     En gravedad alta el caso no avanza con una sola decision: se exige
+         *     que un segundo revisor coincida. Si discrepan, escala al supervisor.
+         */
+        post: operations["emitir_decision_api_v1_revision_casos__denuncia_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/evidencias/{evidencia_id}/descarga": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Descargar una copia marcada de la evidencia
+         * @description Entrega una copia unica marcada y registra la descarga.
+         *
+         *     La justificacion es obligatoria: si un revisor tiene que escribir por
+         *     que necesita el archivo, la descarga por curiosidad deja de ser
+         *     gratuita. Y si la copia se filtra, marca_id dice cual de todas fue.
+         */
+        post: operations["descargar_evidencia_api_v1_revision_evidencias__evidencia_id__descarga_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/bitacora": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Registro de integridad completo
+         * @description Devuelve la cadena de eventos para que cualquiera la verifique.
+         *
+         *     Publico y sin autenticacion a proposito: un registro que solo puede
+         *     auditar quien opera el portal no prueba nada. Los payloads no
+         *     contienen datos identificatorios, y hay una prueba automatizada que
+         *     lo garantiza (ver test_auditoria_identidad.py).
+         */
+        get: operations["exportar_bitacora_api_v1_publico_bitacora_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/bitacora/estado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado de integridad de la cadena
+         * @description Verifica la cadena y reporta si esta intacta.
+         *
+         *     Que el propio portal diga que su cadena esta bien no prueba nada: por
+         *     eso existe el verificador independiente. Esto es un indicador rapido,
+         *     no una garantia, y se declara asi.
+         */
+        get: operations["estado_cadena_api_v1_publico_bitacora_estado_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -158,6 +377,64 @@ export interface components {
             archivo: string;
         };
         /**
+         * CasoDetalle
+         * @description Vista completa para el revisor
+         */
+        CasoDetalle: {
+            /** Denuncia Id */
+            denuncia_id: number;
+            estado: components["schemas"]["EstadoDenuncia"];
+            gravedad: components["schemas"]["Gravedad"] | null;
+            /** Categoria */
+            categoria: string;
+            /** Institucion */
+            institucion: string;
+            nivel_identidad: components["schemas"]["NivelIdentidad"];
+            /** Seudonimo */
+            seudonimo: string | null;
+            /** Relato */
+            relato: string;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+            /** Evidencias */
+            evidencias: components["schemas"]["EvidenciaEnCaso"][];
+            /** Mensajes */
+            mensajes: components["schemas"]["MensajeEnCaso"][];
+            /** Revisores Asignados */
+            revisores_asignados: string[];
+        };
+        /**
+         * CasoEnCola
+         * @description vista de la lista
+         */
+        CasoEnCola: {
+            /** Denuncia Id */
+            denuncia_id: number;
+            estado: components["schemas"]["EstadoDenuncia"];
+            gravedad: components["schemas"]["Gravedad"] | null;
+            /** Categoria */
+            categoria: string;
+            /** Institucion */
+            institucion: string;
+            nivel_identidad: components["schemas"]["NivelIdentidad"];
+            /** Seudonimo */
+            seudonimo: string | null;
+            /** Evidencias */
+            evidencias: number | null;
+            /** Mensajes Sin Leer */
+            mensajes_sin_leer: number;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+            /** Asignado A Mi */
+            asignado_a_mi: boolean;
+        };
+        /**
          * Catalogo
          * @description Listas que alimentan los desplegables del asistente.
          */
@@ -174,6 +451,25 @@ export interface components {
             /** Nombre */
             nombre: string;
         };
+        /** Credenciales */
+        Credenciales: {
+            /** Usuario */
+            usuario: string;
+            /** Password */
+            password: string;
+        };
+        /** DecisionEmitir */
+        DecisionEmitir: {
+            decision: components["schemas"]["DecisionRevision"];
+            /** Notas */
+            notas?: string | null;
+        };
+        /**
+         * DecisionRevision
+         * @description Resultado del triaje de un revisor sobre una denuncia.
+         * @enum {string}
+         */
+        DecisionRevision: "procede" | "rechaza" | "solicita_ampliacion" | "deriva";
         /** DenunciaCreada */
         DenunciaCreada: {
             /** Denuncia Id */
@@ -233,11 +529,38 @@ export interface components {
             mensajes: components["schemas"]["MensajeVista"][];
         };
         /**
+         * DescargaSolicitud
+         * @description La justificacion es obligatoria y se guarda para auditoria.
+         */
+        DescargaSolicitud: {
+            /** Justificacion */
+            justificacion: string;
+        };
+        /**
          * EstadoDenuncia
          * @description ciclo de vida
          * @enum {string}
          */
         EstadoDenuncia: "recibida" | "en_saneamiento" | "en_triaje" | "en_revision_doble" | "escalada" | "en_redaccion" | "critica" | "derivada" | "publicada" | "rechazada";
+        /**
+         * EvidenciaEnCaso
+         * @description metadatos de los archivos adjuntos
+         */
+        EvidenciaEnCaso: {
+            /** Evidencia Id */
+            evidencia_id: number;
+            /** Mime */
+            mime: string;
+            /** Sha256 */
+            sha256: string;
+            /** Sanitizada */
+            sanitizada: boolean;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+        };
         /** EvidenciaSubida */
         EvidenciaSubida: {
             /** Evidencia Id */
@@ -264,6 +587,10 @@ export interface components {
          * @enum {string}
          */
         Gravedad: "baja" | "media" | "alta" | "critica";
+        /** GravedadAsignar */
+        GravedadAsignar: {
+            gravedad: components["schemas"]["Gravedad"];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -284,6 +611,20 @@ export interface components {
             /** Cuerpo */
             cuerpo: string;
         };
+        /** MensajeEnCaso */
+        MensajeEnCaso: {
+            /** Id */
+            id: number;
+            /** Autor */
+            autor: string;
+            /** Cuerpo */
+            cuerpo: string;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+        };
         /** MensajeVista */
         MensajeVista: {
             /** Id */
@@ -303,6 +644,38 @@ export interface components {
          * @enum {string}
          */
         NivelIdentidad: "anonimo" | "seudonimo" | "publico";
+        /** ResultadoDecision */
+        ResultadoDecision: {
+            /** Denuncia Id */
+            denuncia_id: number;
+            estado: components["schemas"]["EstadoDenuncia"];
+            gravedad: components["schemas"]["Gravedad"] | null;
+            /** Revisiones */
+            revisiones: number;
+            /** Mensaje */
+            mensaje: string;
+        };
+        /**
+         * RevisorVista
+         * @description Identidad del revisor en sesion. Sin password ni token.
+         */
+        RevisorVista: {
+            /** Id */
+            id: number;
+            /** Nombre */
+            nombre: string;
+            /** Organizacion */
+            organizacion: string;
+            rol: components["schemas"]["RolRevisor"];
+        };
+        /**
+         * RolRevisor
+         * @description Los designa la organizacion que opera el portal, no se eligen entre
+         *     los usuarios. El supervisor resuelve desacuerdos y aprueba casos
+         *     graves.
+         * @enum {string}
+         */
+        RolRevisor: "revisor" | "supervisor";
         /** Salud */
         Salud: {
             /** Estado */
@@ -532,6 +905,357 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sesion_actual_api_v1_sesion_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevisorVista"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    iniciar_sesion_api_v1_sesion_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Credenciales"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevisorVista"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    terminar_sesion_api_v1_sesion_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cola_de_triaje_api_v1_revision_cola_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasoEnCola"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tomar_caso_api_v1_revision_casos__denuncia_id__tomar_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detalle_caso_api_v1_revision_casos__denuncia_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasoDetalle"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    asignar_gravedad_api_v1_revision_casos__denuncia_id__gravedad_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GravedadAsignar"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultadoDecision"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    emitir_decision_api_v1_revision_casos__denuncia_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionEmitir"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultadoDecision"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    descargar_evidencia_api_v1_revision_evidencias__evidencia_id__descarga_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evidencia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DescargaSolicitud"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportar_bitacora_api_v1_publico_bitacora_get: {
+        parameters: {
+            query?: {
+                desde?: number;
+                limite?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    estado_cadena_api_v1_publico_bitacora_estado_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };
