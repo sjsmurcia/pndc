@@ -40,7 +40,9 @@ from app.api.v1.denuncias import DIR_EVIDENCIAS
 from app.models.integridad import DescargaEvidencia
 from app.schemas.revision import DescargaSolicitud
 from app.services.marca import MarcadoFallido, marcar_copia
-
+from app.api.dependencias import revisor_actual, supervisor_actual
+from app.models.desenlace import Publicacion
+from app.schemas.revision import PublicacionVista,RedaccionGuardar
 router = APIRouter(prefix="/revision", tags=["revision"])
 
 # Estados que siguen en la cola. Los desenlaces quedan fuera.
@@ -561,4 +563,108 @@ def descargar_evidencia(
             # esta identificada. La disuasion funciona mejor si se sabe.
             "X-PNDC-Marca": str(copia.marca_id),
         },
+    )
+@router.put(
+    "/casos/{denuncia_id}/redaccion",
+    response_model=PublicacionVista,
+    summary="Guardar la version publicable",
+)
+def guardar_redaccion(
+    denuncia_id: int,
+    datos: RedaccionGuardar,
+    revisor: Revisor = Depends(revisor_actual),
+    db: Session = Depends(get_db),
+) -> PublicacionVista:
+    """Crea o actualiza el texto redactado. No publica nada.
+
+    Guardar y publicar son acciones distintas a proposito: quien redacta
+    no decide que se hace publico.
+    """
+    denuncia = _caso_asignado(db, denuncia_id, revisor)
+
+    if denuncia.estado != EstadoDenuncia.EN_REDACCION:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"El caso esta en estado {denuncia.estado.value} y no admite "
+            "redaccion",
+        )
+
+    publicacion = db.execute(
+        select(Publicacion).where(Publicacion.denuncia_id == denuncia_id)
+    ).scalar_one_or_none()
+
+    if publicacion is None:
+        publicacion = Publicacion(
+            denuncia_id=denuncia_id,
+            texto_redactado=datos.texto_redactado,
+        )
+        db.add(publicacion)
+    else:
+        publicacion.texto_redactado = datos.texto_redactado
+
+    db.flush()
+
+    return PublicacionVista(
+        denuncia_id=denuncia_id,
+        publicacion_id=publicacion.id,
+        estado=denuncia.estado,
+        texto_redactado=publicacion.texto_redactado,
+        publicado=False,
+        creado_en=publicacion.creado_en,
+    )
+
+
+@router.post(
+    "/casos/{denuncia_id}/publicar",
+    response_model=PublicacionVista,
+    summary="Aprobar y publicar un caso",
+)
+def publicar_caso(
+    denuncia_id: int,
+    supervisor: Revisor = Depends(supervisor_actual),
+    db: Session = Depends(get_db),
+) -> PublicacionVista:
+    """Publica el caso. Solo un supervisor puede hacerlo.
+
+    Quien redacta no publica: separar la escritura de la autorizacion es
+    el mismo principio que el doble revisor en casos graves.
+    """
+    denuncia = db.get(Denuncia, denuncia_id)
+    if denuncia is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Caso inexistente")
+
+    publicacion = db.execute(
+        select(Publicacion).where(Publicacion.denuncia_id == denuncia_id)
+    ).scalar_one_or_none()
+
+    if publicacion is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "No hay version redactada que publicar",
+        )
+
+    try:
+        validar_transicion(denuncia.estado, EstadoDenuncia.PUBLICADA)
+    except TransicionInvalida as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+
+    denuncia.estado = EstadoDenuncia.PUBLICADA
+
+    cadena.registrar(
+        db,
+        TipoEvento.CASO_PUBLICADO,
+        {
+            "denuncia_id": denuncia_id,
+            "revisor_id": supervisor.id,
+            "publicacion_id": publicacion.id,
+        },
+    )
+
+    return PublicacionVista(
+        denuncia_id=denuncia_id,
+        publicacion_id=publicacion.id,
+        estado=denuncia.estado,
+        texto_redactado=publicacion.texto_redactado,
+        publicado=True,
+        creado_en=publicacion.creado_en,
     )

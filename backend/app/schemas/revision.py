@@ -89,3 +89,21 @@ class DescargaSolicitud(BaseModel):
     """La justificacion es obligatoria y se guarda para auditoria."""
 
     justificacion: str = Field(min_length=20, max_length=2000)
+
+class RedaccionGuardar(BaseModel):
+    """Version publicable del caso.
+
+    Es un texto nuevo, no la denuncia original: se elimina lo que
+    identifique a terceros no verificados.
+    """
+
+    texto_redactado: str = Field(min_length=100, max_length=20000)
+
+
+class PublicacionVista(BaseModel):
+    denuncia_id: int
+    publicacion_id: int
+    estado: EstadoDenuncia
+    texto_redactado: str
+    publicado: bool
+    creado_en: datetime
