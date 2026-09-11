@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Denunciar } from "./paginas/Denunciar";
 import { Verificar } from "./paginas/Verificar";
-
-type Vista = "denunciar" | "verificar";
-
+import { Seguimiento } from "./paginas/Seguimiento";
+type Vista = "denunciar" | "seguimiento" | "verificar";
 export default function App() {
   const [vista, setVista] = useState<Vista>("denunciar");
   return (
@@ -41,7 +40,11 @@ export default function App() {
               Portal Nacional de Denuncias de Corrupción
             </span>
           </div>
-          <nav style={{ marginLeft: "auto", display: "flex", gap: "var(--sp-4)" }}>
+          <nav style={{
+            display: "flex",
+            gap: "var(--sp-5)",
+            padding: "0 var(--sp-5) var(--sp-2)"
+          }}>
             <button
               type="button"
               onClick={() => setVista("denunciar")}
@@ -56,11 +59,19 @@ export default function App() {
             >
               Verificar registro
             </button>
+            <button
+              type="button"
+              onClick={() => setVista("seguimiento")}
+              style={enlaceNav(vista === "seguimiento")}
+            >
+              Seguimiento
+            </button>
           </nav>
         </header>
 
-                {vista === "denunciar" ? <Denunciar /> : <Verificar />}
-
+        {vista === "denunciar" && <Denunciar />}
+        {vista === "seguimiento" && <Seguimiento />}
+        {vista === "verificar" && <Verificar />}
         <footer
           style={{
             borderTop: "1px solid var(--borde)",

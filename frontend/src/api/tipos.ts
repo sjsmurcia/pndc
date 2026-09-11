@@ -307,6 +307,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/revision/casos/{denuncia_id}/redaccion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Guardar la version publicable
+         * @description Crea o actualiza el texto redactado. No publica nada.
+         *
+         *     Guardar y publicar son acciones distintas a proposito: quien redacta
+         *     no decide que se hace publico.
+         */
+        put: operations["guardar_redaccion_api_v1_revision_casos__denuncia_id__redaccion_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/revision/casos/{denuncia_id}/publicar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprobar y publicar un caso
+         * @description Publica el caso. Solo un supervisor puede hacerlo.
+         *
+         *     Quien redacta no publica: separar la escritura de la autorizacion es
+         *     el mismo principio que el doble revisor en casos graves.
+         */
+        post: operations["publicar_caso_api_v1_revision_casos__denuncia_id__publicar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/publico/bitacora": {
         parameters: {
             query?: never;
@@ -348,6 +394,54 @@ export interface paths {
          *     no una garantia, y se declara asi.
          */
         get: operations["estado_cadena_api_v1_publico_bitacora_estado_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/casos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Casos publicados
+         * @description Lista las versiones redactadas de los casos publicados.
+         *
+         *     Devuelve el texto redactado, nunca el relato original: el primero lo
+         *     escribio un revisor eliminando lo que identificaria a terceros; el
+         *     segundo es lo que escribio quien denuncio.
+         */
+        get: operations["casos_publicados_api_v1_publico_casos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/publico/ranking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Denuncias publicadas por institucion y categoria
+         * @description Conteo de casos PUBLICADOS, no de denuncias recibidas.
+         *
+         *     Contar lo recibido permitiria que cualquiera inflara la posicion de
+         *     una institucion enviando denuncias falsas. Solo cuenta lo que un
+         *     revisor aprobo y un supervisor publico.
+         */
+        get: operations["ranking_api_v1_publico_ranking_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -644,6 +738,34 @@ export interface components {
          * @enum {string}
          */
         NivelIdentidad: "anonimo" | "seudonimo" | "publico";
+        /** PublicacionVista */
+        PublicacionVista: {
+            /** Denuncia Id */
+            denuncia_id: number;
+            /** Publicacion Id */
+            publicacion_id: number;
+            estado: components["schemas"]["EstadoDenuncia"];
+            /** Texto Redactado */
+            texto_redactado: string;
+            /** Publicado */
+            publicado: boolean;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+        };
+        /**
+         * RedaccionGuardar
+         * @description Version publicable del caso.
+         *
+         *     Es un texto nuevo, no la denuncia original: se elimina lo que
+         *     identifique a terceros no verificados.
+         */
+        RedaccionGuardar: {
+            /** Texto Redactado */
+            texto_redactado: string;
+        };
         /** ResultadoDecision */
         ResultadoDecision: {
             /** Denuncia Id */
@@ -1208,6 +1330,76 @@ export interface operations {
             };
         };
     };
+    guardar_redaccion_api_v1_revision_casos__denuncia_id__redaccion_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedaccionGuardar"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicacionVista"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publicar_caso_api_v1_revision_casos__denuncia_id__publicar_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                denuncia_id: number;
+            };
+            cookie?: {
+                pndc_sesion?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicacionVista"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     exportar_bitacora_api_v1_publico_bitacora_get: {
         parameters: {
             query?: {
@@ -1241,6 +1433,57 @@ export interface operations {
         };
     };
     estado_cadena_api_v1_publico_bitacora_estado_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    casos_publicados_api_v1_publico_casos_get: {
+        parameters: {
+            query?: {
+                limite?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ranking_api_v1_publico_ranking_get: {
         parameters: {
             query?: never;
             header?: never;
