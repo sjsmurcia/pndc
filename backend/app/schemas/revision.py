@@ -3,6 +3,8 @@ from pydantic import BaseModel, Field
 from app.models.enums import RolRevisor
 from datetime import datetime
 from app.models.enums import EstadoDenuncia, Gravedad, NivelIdentidad
+from app.models.enums import DecisionRevision
+
 
 class Credenciales(BaseModel):
     usuario: str = Field(min_length=3, max_length=60)
@@ -18,50 +20,68 @@ class RevisorVista(BaseModel):
     rol: RolRevisor
 
 
-
 class CasoEnCola(BaseModel):
     """vista de la lista"""
 
-    denuncia_id:int
-    estado:EstadoDenuncia
+    denuncia_id: int
+    estado: EstadoDenuncia
     gravedad: Gravedad | None
-    categoria:str
+    categoria: str
     institucion: str
     nivel_identidad: NivelIdentidad
-    seudonimo:str | None
+    seudonimo: str | None
     evidencias: int | None
-    mensajes_sin_leer:int
+    mensajes_sin_leer: int
     creado_en: datetime
-    asignado_a_mi:bool
+    asignado_a_mi: bool
+
 
 class EvidenciaEnCaso(BaseModel):
     """metadatos de los archivos adjuntos"""
-    evidencia_id:int
-    mime:str
+
+    evidencia_id: int
+    mime: str
     sha256: str
     sanitizada: bool
-    creado_en:datetime
+    creado_en: datetime
+
 
 class CasoDetalle(BaseModel):
     """Vista completa para el revisor"""
-    denuncia_id:int
-    estado:EstadoDenuncia
+
+    denuncia_id: int
+    estado: EstadoDenuncia
     gravedad: Gravedad | None
     categoria: str
-    institucion:str
+    institucion: str
     nivel_identidad: NivelIdentidad
     seudonimo: str | None
-    relato:str
+    relato: str
     creado_en: datetime
-    evidencias:list[EvidenciaEnCaso]
-    mensajes:list["MensajeEnCaso"]
-    revisores_asignados:list[str]
+    evidencias: list[EvidenciaEnCaso]
+    mensajes: list["MensajeEnCaso"]
+    revisores_asignados: list[str]
 
 
 class MensajeEnCaso(BaseModel):
-    id:int
-    autor:str
-    cuerpo:str
-    creado_en:datetime
+    id: int
+    autor: str
+    cuerpo: str
+    creado_en: datetime
 
 
+class GravedadAsignar(BaseModel):
+    gravedad: Gravedad
+
+
+class DecisionEmitir(BaseModel):
+    decision: DecisionRevision
+    notas: str | None = Field(default=None, max_length=4000)
+
+
+class ResultadoDecision(BaseModel):
+    denuncia_id: int
+    estado: EstadoDenuncia
+    gravedad: Gravedad | None
+    revisiones: int
+    mensaje: str
