@@ -32,6 +32,15 @@ from app.services.triaje import EXIGEN_DOBLE_REVISION
 from app.models.enums import AutorMensaje, DecisionRevision, EstadoDenuncia, Gravedad
 from app.models.revision import AsignacionRevision, Revision, Revisor
 
+from pathlib import Path
+
+from fastapi import Response
+
+from app.api.v1.denuncias import DIR_EVIDENCIAS
+from app.models.integridad import DescargaEvidencia
+from app.schemas.revision import DescargaSolicitud
+from app.services.marca import MarcadoFallido, marcar_copia
+
 router = APIRouter(prefix="/revision", tags=["revision"])
 
 # Estados que siguen en la cola. Los desenlaces quedan fuera.
@@ -293,9 +302,7 @@ def asignar_gravedad(
         try:
             validar_transicion(denuncia.estado, destino)
         except TransicionInvalida as exc:
-            raise HTTPException(
-                status.HTTP_409_CONFLICT, str(exc)
-            ) from exc
+            raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
         denuncia.estado = destino
 
     cadena.registrar(
@@ -330,10 +337,9 @@ def asignar_gravedad(
 
 def _contar_revisiones(db: Session, denuncia_id: int) -> int:
     return db.execute(
-        select(func.count(Revision.id)).where(
-            Revision.denuncia_id == denuncia_id
-        )
+        select(func.count(Revision.id)).where(Revision.denuncia_id == denuncia_id)
     ).scalar_one()
+
 
 @router.post(
     "/casos/{denuncia_id}/decision",
@@ -396,9 +402,7 @@ def emitir_decision(
     )
 
     decisiones = (
-        db.execute(
-            select(Revision).where(Revision.denuncia_id == denuncia_id)
-        )
+        db.execute(select(Revision).where(Revision.denuncia_id == denuncia_id))
         .scalars()
         .all()
     )
@@ -472,9 +476,7 @@ def _resolver_avance(
                 EstadoDenuncia.ESCALADA,
             )
 
-    destino = estado_tras_decision(
-        denuncia.estado, ultima.decision, denuncia.gravedad
-    )
+    destino = estado_tras_decision(denuncia.estado, ultima.decision, denuncia.gravedad)
 
     textos = {
         EstadoDenuncia.RECHAZADA: "Caso rechazado y archivado.",
@@ -487,3 +489,76 @@ def _resolver_avance(
     }
 
     return textos.get(destino, "Decision registrada."), destino
+
+
+@router.post(
+    "/evidencias/{evidencia_id}/descarga",
+    summary="Descargar una copia marcada de la evidencia",
+)
+def descargar_evidencia(
+    evidencia_id: int,
+    datos: DescargaSolicitud,
+    revisor: Revisor = Depends(revisor_actual),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Entrega una copia unica marcada y registra la descarga.
+
+    La justificacion es obligatoria: si un revisor tiene que escribir por
+    que necesita el archivo, la descarga por curiosidad deja de ser
+    gratuita. Y si la copia se filtra, marca_id dice cual de todas fue.
+    """
+    evidencia = db.get(Evidencia, evidencia_id)
+    if evidencia is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Evidencia inexistente")
+
+    # Solo quien tiene el caso asignado puede descargar su evidencia.
+    _caso_asignado(db, evidencia.denuncia_id, revisor)
+
+    ruta = DIR_EVIDENCIAS / Path(evidencia.url).name
+    if not ruta.exists():
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "El archivo no esta disponible")
+
+    try:
+        copia = marcar_copia(ruta.read_bytes(), evidencia.mime)
+    except MarcadoFallido as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
+
+    db.add(
+        DescargaEvidencia(
+            evidencia_id=evidencia_id,
+            revisor_id=revisor.id,
+            justificacion=datos.justificacion,
+            marca_id=copia.marca_id,
+            sha256_copia=copia.sha256,
+        )
+    )
+    db.flush()
+
+    cadena.registrar(
+        db,
+        TipoEvento.EVIDENCIA_DESCARGADA,
+        {
+            "evidencia_id": evidencia_id,
+            "revisor_id": revisor.id,
+            "marca_id": str(copia.marca_id),
+            "sha256_copia": copia.sha256,
+        },
+    )
+
+    # PNG siempre: la marca vive en los pixeles y JPEG la destruiria al
+    # recomprimir.
+    extension = "png" if evidencia.mime != "application/pdf" else "pdf"
+    tipo = "image/png" if extension == "png" else "application/pdf"
+
+    return Response(
+        content=copia.contenido,
+        media_type=tipo,
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="evidencia-{evidencia_id}.{extension}"'
+            ),
+            # Marca visible en la cabecera: el revisor sabe que su copia
+            # esta identificada. La disuasion funciona mejor si se sabe.
+            "X-PNDC-Marca": str(copia.marca_id),
+        },
+    )

@@ -85,3 +85,7 @@ class ResultadoDecision(BaseModel):
     gravedad: Gravedad | None
     revisiones: int
     mensaje: str
+class DescargaSolicitud(BaseModel):
+    """La justificacion es obligatoria y se guarda para auditoria."""
+
+    justificacion: str = Field(min_length=20, max_length=2000)
