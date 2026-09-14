@@ -107,3 +107,21 @@ class PublicacionVista(BaseModel):
     texto_redactado: str
     publicado: bool
     creado_en: datetime
+
+
+class DescargaAuditada(BaseModel):
+    """una copia de evidencia entregada a un revisor"""
+    descarga_id: int
+    evidencia_id: int
+    denuncia_id: int
+    revisor: str
+    organizacion: str
+    justificacion: str
+    marca_id: str
+    sha256_copia: str
+    creado_en: datetime
+
+
+class AuditoriaDescargas(BaseModel):
+    total: int
+    descargas: list[DescargaAuditada]

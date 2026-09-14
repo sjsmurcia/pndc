@@ -43,6 +43,7 @@ from app.services.marca import MarcadoFallido, marcar_copia
 from app.api.dependencias import revisor_actual, supervisor_actual
 from app.models.desenlace import Publicacion
 from app.schemas.revision import PublicacionVista,RedaccionGuardar
+from app.schemas.revision import AuditoriaDescargas, DescargaAuditada
 router = APIRouter(prefix="/revision", tags=["revision"])
 
 # Estados que siguen en la cola. Los desenlaces quedan fuera.
@@ -667,4 +668,103 @@ def publicar_caso(
         texto_redactado=publicacion.texto_redactado,
         publicado=True,
         creado_en=publicacion.creado_en,
+    )
+
+@router.get(
+    "/auditoria/descargas",
+    response_model=AuditoriaDescargas,
+    summary="Historial de descargas de evidencia",
+)
+def auditoria_descargas(
+    evidencia_id: int | None = None,
+    revisor_id: int | None = None,
+    supervisor: Revisor = Depends(supervisor_actual),
+    db: Session = Depends(get_db),
+) -> AuditoriaDescargas:
+    """Lista cada copia de evidencia entregada, con quien la pidio y por que.
+
+    Solo supervisores: un revisor consultando que descargan sus colegas
+    seria vigilancia lateral, no rendicion de cuentas.
+
+    Esta consulta NO se registra en la bitacora. Registrar cada acceso a
+    la auditoria llenaria la cadena de ruido y el supervisor ya esta
+    identificado en el sistema. Es un limite conocido: el supervisor
+    tiene un punto ciego sobre su propia actividad de consulta.
+    """
+    consulta = (
+        select(DescargaEvidencia, Evidencia, Revisor)
+        .join(Evidencia, Evidencia.id == DescargaEvidencia.evidencia_id)
+        .join(Revisor, Revisor.id == DescargaEvidencia.revisor_id)
+        .order_by(DescargaEvidencia.creado_en.desc())
+    )
+
+    if evidencia_id is not None:
+        consulta = consulta.where(
+            DescargaEvidencia.evidencia_id == evidencia_id
+        )
+    if revisor_id is not None:
+        consulta = consulta.where(DescargaEvidencia.revisor_id == revisor_id)
+
+    filas = db.execute(consulta).all()
+
+    return AuditoriaDescargas(
+        total=len(filas),
+        descargas=[
+            DescargaAuditada(
+                descarga_id=descarga.id,
+                evidencia_id=descarga.evidencia_id,
+                denuncia_id=evidencia.denuncia_id,
+                revisor=revisor.nombre,
+                organizacion=revisor.organizacion,
+                justificacion=descarga.justificacion,
+                marca_id=str(descarga.marca_id),
+                sha256_copia=descarga.sha256_copia,
+                creado_en=descarga.creado_en,
+            )
+            for descarga, evidencia, revisor in filas
+        ],
+    )
+
+
+@router.get(
+    "/auditoria/marca/{marca_id}",
+    response_model=DescargaAuditada,
+    summary="Identificar el origen de una copia filtrada",
+)
+def rastrear_marca(
+    marca_id: str,
+    supervisor: Revisor = Depends(supervisor_actual),
+    db: Session = Depends(get_db),
+) -> DescargaAuditada:
+    """Dado el identificador extraido de un archivo, devuelve su descarga.
+
+    Es la operacion que se ejecuta cuando aparece una filtracion: se
+    extrae la marca del archivo con el servicio de marca y se consulta
+    aqui de que descarga salio.
+    """
+    fila = db.execute(
+        select(DescargaEvidencia, Evidencia, Revisor)
+        .join(Evidencia, Evidencia.id == DescargaEvidencia.evidencia_id)
+        .join(Revisor, Revisor.id == DescargaEvidencia.revisor_id)
+        .where(DescargaEvidencia.marca_id == marca_id)
+    ).one_or_none()
+
+    if fila is None:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "No hay ninguna descarga con esa marca",
+        )
+
+    descarga, evidencia, revisor = fila
+
+    return DescargaAuditada(
+        descarga_id=descarga.id,
+        evidencia_id=descarga.evidencia_id,
+        denuncia_id=evidencia.denuncia_id,
+        revisor=revisor.nombre,
+        organizacion=revisor.organizacion,
+        justificacion=descarga.justificacion,
+        marca_id=str(descarga.marca_id),
+        sha256_copia=descarga.sha256_copia,
+        creado_en=descarga.creado_en,
     )
