@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { obtenerEstadoCadena } from "../api/cliente";
 
 type Estado = Awaited<ReturnType<typeof obtenerEstadoCadena>>;

@@ -2,7 +2,12 @@ import type { paths } from "./tipos";
 
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8001";
 /*extrae del openapi el tipo de una respuesta correcta */
-
+/** Extrae del OpenAPI el tipo del cuerpo de una peticion. */
+type Cuerpo<T> = T extends {
+  requestBody: { content: { "application/json": infer C } };
+}
+  ? C
+  : never;
 type Respuesta<T> = T extends { responses: infer R }
   ? R extends { 200: { content: { "application/json": infer C } } }
     ? C
@@ -108,24 +113,44 @@ export function obtenerReto() {
   return peticion<Respuesta<ObtenerReto>>("/api/v1/denuncias/reto");
 }
 
-//publico
+// --- Publico ---
+//
+// Estos dos endpoints no declaran response_model en FastAPI, asi que el
+// OpenAPI no lleva su esquema de respuesta y el tipo generado sale vacio.
+// Se tipan a mano hasta que el backend los declare.
 
-type EstadoCadena = paths["/api/v1/publico/bitacora/estado"]["get"];
-export function obtenerEstadoCadena(){
-  return peticion<Respuesta<EstadoCadena>>("/api/v1/publico/bitacora/estado");
-  
-}
-
-
-type Ranking = paths["/api/v1/publico/ranking"]["get"];
+type RankingRespuesta = {
+  titulo: string;
+  aclaracion: string;
+  instituciones: { nombre: string; tipo: string; casos: number }[];
+  categorias: { nombre: string; casos: number }[];
+};
 
 export function obtenerRanking() {
-  return peticion<Respuesta<Ranking>>("/api/v1/publico/ranking");
+  return peticion<RankingRespuesta>("/api/v1/publico/ranking");
 }
 
-type CasosPublicados = paths["/api/v1/publico/casos"]["get"];
+type CasoPublicadoRespuesta = {
+  caso_id: number;
+  categoria: string;
+  institucion: string;
+  tipo_institucion: string;
+  gravedad: string | null;
+  texto: string;
+  publicado_en: string;
+};
 
 export function obtenerCasosPublicados() {
-  return peticion<Respuesta<CasosPublicados>>("/api/v1/publico/casos");
+  return peticion<CasoPublicadoRespuesta[]>("/api/v1/publico/casos");
 }
 
+type EstadoCadenaRespuesta = {
+  intacta: boolean;
+  eventos: number;
+  indice_roto: number | null;
+  advertencia: string;
+};
+
+export function obtenerEstadoCadena() {
+  return peticion<EstadoCadenaRespuesta>("/api/v1/publico/bitacora/estado");
+}
