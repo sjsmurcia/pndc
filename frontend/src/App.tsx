@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Denunciar } from "./paginas/Denunciar";
 import { Verificar } from "./paginas/Verificar";
 import { Seguimiento } from "./paginas/Seguimiento";
-type Vista = "denunciar" | "seguimiento" | "verificar";
+import { Publico } from "./paginas/Publico";
+type Vista = "denunciar" | "publico" | "seguimiento" | "verificar";
 export default function App() {
   const [vista, setVista] = useState<Vista>("denunciar");
   return (
@@ -45,6 +46,7 @@ export default function App() {
             gap: "var(--sp-5)",
             padding: "0 var(--sp-5) var(--sp-2)"
           }}>
+
             <button
               type="button"
               onClick={() => setVista("denunciar")}
@@ -66,12 +68,21 @@ export default function App() {
             >
               Seguimiento
             </button>
+
+            <button
+              type="button"
+              onClick={() => setVista("publico")}
+              style={enlaceNav(vista === "publico")}
+            >
+              Casos publicados
+            </button>
           </nav>
         </header>
 
         {vista === "denunciar" && <Denunciar />}
         {vista === "seguimiento" && <Seguimiento />}
         {vista === "verificar" && <Verificar />}
+        {vista === "publico" && <Publico />}
         <footer
           style={{
             borderTop: "1px solid var(--borde)",

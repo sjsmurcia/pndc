@@ -115,3 +115,17 @@ export function obtenerEstadoCadena(){
   return peticion<Respuesta<EstadoCadena>>("/api/v1/publico/bitacora/estado");
   
 }
+
+
+type Ranking = paths["/api/v1/publico/ranking"]["get"];
+
+export function obtenerRanking() {
+  return peticion<Respuesta<Ranking>>("/api/v1/publico/ranking");
+}
+
+type CasosPublicados = paths["/api/v1/publico/casos"]["get"];
+
+export function obtenerCasosPublicados() {
+  return peticion<Respuesta<CasosPublicados>>("/api/v1/publico/casos");
+}
+
