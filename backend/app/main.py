@@ -21,7 +21,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "https://kind-coast-04af37910.3.azurestaticapps.net",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
